@@ -1,0 +1,6 @@
+<Project>
+    <PropertyGroup>
+        <EFCoreProject>bookingapi/BookingApi.csproj</EFCoreProject>
+        <EFCoreStartup>bookingapi/BookingApi.csproj</EFCoreStartup>
+    </PropertyGroup>
+</Project>
