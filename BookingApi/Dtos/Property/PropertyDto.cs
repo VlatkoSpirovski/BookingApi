@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using BookingApi.Dtos.Address;
 using BookingApi.Dtos.Photos;
@@ -5,6 +7,8 @@ using BookingApi.Dtos.PropertyAmenity;
 using BookingApi.Dtos.RatingsAndReviews;
 using BookingApi.Enums;
 using BookingApi.Models;
+using BookingApi.Dtos.Bookings;
+
 
 namespace BookingApi.DTOs.Property
 {
@@ -39,19 +43,48 @@ namespace BookingApi.DTOs.Property
         public bool IsAvailable { get; set; } = true;
 
         public decimal AverageRating { get; set; }
-        
+
         public DateTime? CreatedDate { get; set; }
 
         [Required]
         public PropertyType Type { get; set; }
-        
+
         public List<RatingsAndReviewsDto> RatingsAndReviews { get; set; } = new List<RatingsAndReviewsDto>();
         public List<PropertyAmenityDto> Amenities { get; set; } = new List<PropertyAmenityDto>();
         public List<PhotoDto> Photos { get; set; } = new List<PhotoDto>(); // Include photos
 
-        //Address
-        
+        // Address
         public AddressDto Address { get; set; }
-        
+
+        // List of bookings
+        public List<BookingDto> Bookings { get; set; } = new List<BookingDto>();
+
+        // Method to check if a property is available for a given date range
+        public bool IsAvailableForDates(DateTime startDate, DateTime endDate)
+        {
+            // Check if the booking dates overlap with any existing bookings
+            foreach (var booking in Bookings)
+            {
+                if (booking.StartDate < endDate && booking.EndDate > startDate)
+                {
+                    return false; // Dates overlap, property is not available
+                }
+            }
+            return true; // Property is available
+        }
+
+        // Method to add a booking
+        public void AddBooking(BookingDto bookingDto)
+        {
+            if (IsAvailableForDates(bookingDto.StartDate, bookingDto.EndDate))
+            {
+                Bookings.Add(bookingDto);
+                IsAvailable = false; // Set to false as it is now booked
+            }
+            else
+            {
+                throw new InvalidOperationException("The property is not available for the selected dates.");
+            }
+        }
     }
 }

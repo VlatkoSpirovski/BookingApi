@@ -40,9 +40,9 @@ public class CreatePropertyRequestDto
     public PropertyType Type { get; set; }
     
     //Address
-    public AddressDto Address { get; set; }
-    public List<PropertyAmenityDto> Amenities { get; set; } = new List<PropertyAmenityDto>();
-    public List<PhotoDto> Photos { get; set; } = new List<PhotoDto>(); // Include photos
+    public CreateAddressDto Address { get; set; }
+    public List<CreatePropertyAmenityDto> Amenities { get; set; } = new List<CreatePropertyAmenityDto>();
+    public List<CreatePhotoViaPropertyDto> Photos { get; set; } = new List<CreatePhotoViaPropertyDto>();
 
 
  }

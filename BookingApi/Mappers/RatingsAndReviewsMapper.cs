@@ -10,6 +10,7 @@ public static class RatingsAndReviewsMapper
     {
         return new RatingsAndReviewsDto
         {
+            Id = ratingsAndReviews.Id,
             Rating = ratingsAndReviews.Rating,
             Review = ratingsAndReviews.Review,
             CreatedDate = ratingsAndReviews.CreatedDate

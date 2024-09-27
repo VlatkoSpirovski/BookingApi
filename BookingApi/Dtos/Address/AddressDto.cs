@@ -5,6 +5,7 @@ namespace BookingApi.Dtos.Address;
 
 public class AddressDto
 {
+    public int Id { get; set; }
     [Required]
     [MinLength(4, ErrorMessage = "Country must be at least with 4 characters")]
     public string Country { get; set; } = string.Empty;

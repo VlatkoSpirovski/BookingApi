@@ -2,79 +2,124 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using BookingApi.Models;
+using BookingApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration; // Add this using directive
 using Microsoft.IdentityModel.Tokens;
 
 namespace BookingApi.Controllers;
 
-[Route("api/[controller]")]
+[Authorize]
 [ApiController]
+[Route("[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly UserManager<IdentityUser> _userManager;
     private readonly SignInManager<IdentityUser> _signInManager;
-    private readonly RoleManager<IdentityRole> _roleManager;
-    private readonly IConfiguration _configuration;
+    private readonly EmailService _emailService;
+    private readonly IConfiguration _configuration; // Add this field to store the configuration
 
-    public AuthController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+    // Inject IConfiguration
+    public AuthController(
+        UserManager<IdentityUser> userManager, 
+        SignInManager<IdentityUser> signInManager, 
+        EmailService emailService,
+        IConfiguration configuration) // Add configuration to the constructor
     {
         _userManager = userManager;
         _signInManager = signInManager;
-        _roleManager = roleManager;
-        _configuration = configuration;
+        _emailService = emailService;
+        _configuration = configuration; // Assign configuration
     }
 
-    [HttpPost("register")]
+    [HttpPost("/register")]
     public async Task<IActionResult> Register([FromBody] RegisterModel model)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         var user = new IdentityUser { UserName = model.Email, Email = model.Email };
         var result = await _userManager.CreateAsync(user, model.Password);
 
-        if (result.Succeeded)
+        if (!result.Succeeded)
         {
-            if (!await _roleManager.RoleExistsAsync(model.Role))
-            {
-                await _roleManager.CreateAsync(new IdentityRole(model.Role));
-            }
-            
-            await _userManager.AddToRoleAsync(user, model.Role);
-
-            return Ok(new { message = "User registered successfully!" });
+            return BadRequest(new { message = "Registration failed" });
         }
 
-        return BadRequest(result.Errors);
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var confirmationLink = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, token }, Request.Scheme);
+
+        // Send confirmation email
+        var emailSubject = "Please confirm your email address";
+        var emailMessage = $"Please confirm your account by clicking this link: <a href='{confirmationLink}'>link</a>";
+        await _emailService.SendEmailAsync(user.Email, emailSubject, emailMessage);
+
+        return Ok(new { message = "Registration successful. Please confirm your email." });
     }
 
-    [HttpPost("login")]
+    [HttpPost("/login")]
     public async Task<IActionResult> Login([FromBody] LoginModel model)
     {
-        var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
-
-        if (result.Succeeded)
+        if (!ModelState.IsValid)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            var token = GenerateJwtToken(user, roles);
-
-            return Ok(new { token });
+            return BadRequest(ModelState);
         }
-
-        return Unauthorized();
+        
+        var user = await _userManager.FindByEmailAsync(model.Email);
+        if (user == null)
+        {
+            return Unauthorized(new { message = "Invalid credentials for the Email" });
+        }
+        
+        var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
+        if (!result.Succeeded)
+        {
+            return Unauthorized(new { message = "Invalid credentials for the Password" });
+        }
+        
+        return Ok(new { token = GenerateJwtToken(user) });
     }
 
-    private string GenerateJwtToken(IdentityUser user, IList<string> roles)
+    [HttpGet("confirmemail")]
+    public async Task<IActionResult> ConfirmEmail(string userId, string token)
     {
-        var claims = new List<Claim>
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            return NotFound("User not found.");
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        if (result.Succeeded)
+        {
+            return Ok("Email confirmed successfully.");
+        }
+
+        return BadRequest("Email confirmation failed.");
+    }
+
+    [HttpGet("/api/users")]
+    public async Task<IActionResult> GetUsers()
+    {
+        var users = await _userManager.Users.ToListAsync();
+        return Ok(users);
+    }
+
+    private string GenerateJwtToken(IdentityUser user)
+    {
+        var claims = new[]
+        {
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id) // Include the user ID
         };
 
-        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
+        // Use _configuration instead of Configuration
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 

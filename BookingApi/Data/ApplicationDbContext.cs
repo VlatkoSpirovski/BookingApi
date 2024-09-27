@@ -1,9 +1,11 @@
 using BookingApi.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookingApi.Data;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
@@ -12,6 +14,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<RatingAndReview> Ratings { get; set; }
     public DbSet<Address> Addresses { get; set; }
     public DbSet<PropertyAmenity> Amenities { get; set; }
+    public DbSet<Booking> Bookings { get; set; }
     public DbSet<Photo> Photos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -35,6 +38,16 @@ public class ApplicationDbContext : DbContext
            .HasOne(p => p.Property)
            .WithMany(ph => ph.Photos)
            .HasForeignKey(ph => ph.PropertyId);
+        
+        modelBuilder.Entity<Property>()
+            .HasMany(p => p.Bookings)
+            .WithOne(b => b.Property)
+            .HasForeignKey(b => b.PropertyId);
+        
+        modelBuilder.Entity<Booking>()
+            .HasOne(b => b.User)
+            .WithMany()
+            .HasForeignKey(b => b.UserId);
         
         base.OnModelCreating(modelBuilder);
     }

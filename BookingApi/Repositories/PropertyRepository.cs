@@ -21,6 +21,7 @@ public class PropertyRepository : IPropertyRepository
             .Include(r => r.Address)
             .Include(a => a.Amenities)
             .Include(p => p.Photos)
+            .Include(b=>b.Bookings)
             .OrderByDescending(p => p.CreatedDate)
             .ToListAsync();
         return props;
@@ -31,8 +32,9 @@ public class PropertyRepository : IPropertyRepository
         var property = await _dbContext.Properties
             .Include(p => p.Address)
             .Include(p => p.RatingsAndReviews)
-            .Include(a => a.Amenities)
+            .Include(p => p.Amenities)
             .Include(p => p.Photos)
+            .Include(p=> p.Bookings)
             .OrderByDescending(p => p.CreatedDate)
             .FirstOrDefaultAsync(p => p.Id == id);
     
@@ -44,7 +46,29 @@ public class PropertyRepository : IPropertyRepository
         await _dbContext.SaveChangesAsync();
         return property;
     }
+    public async Task<List<Property>> GetAvailableProperties(DateTime? startDate, DateTime? endDate)
+    {
+        if (!startDate.HasValue || !endDate.HasValue)
+        {
+            throw new ArgumentException("Start date and end date must be provided.");
+        }
 
+        // Ensure the dates are in UTC
+        DateTime startDateUtc = DateTime.SpecifyKind(startDate.Value, DateTimeKind.Utc);
+        DateTime endDateUtc = DateTime.SpecifyKind(endDate.Value, DateTimeKind.Utc);
+
+        var properties = await _dbContext.Properties
+            .Include(p => p.Bookings)
+            .ToListAsync();
+
+        var availableProperties = properties.Where(p =>
+            !p.Bookings.Any(b => 
+                (b.StartDate < endDateUtc && b.EndDate > startDateUtc)
+            )).ToList();
+
+        return availableProperties;
+    }
+    
     public async Task<Property?> UpdateAsync(Property property, int id)
     {
         var existingProperty = await _dbContext.Properties.FindAsync(id);

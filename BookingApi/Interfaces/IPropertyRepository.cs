@@ -13,4 +13,6 @@ public interface IPropertyRepository
     Task<bool> PropertyExist(int id);
     Task<decimal> CalculateAverageRatingAsync(int propertyId);
     Task UpdateAverageRatingAsync(int propertyId, decimal averageRating);
+    Task<List<Property>> GetAvailableProperties(DateTime? startDate, DateTime? endDate);
+
 }

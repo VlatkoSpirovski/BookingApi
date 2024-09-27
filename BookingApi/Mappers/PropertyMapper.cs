@@ -1,4 +1,5 @@
 using BookingApi.Dtos.Address;
+using BookingApi.Dtos.Bookings;
 using BookingApi.Dtos.Photos;
 using BookingApi.DTOs.Property;
 using BookingApi.Dtos.PropertyAmenity;
@@ -33,6 +34,7 @@ namespace BookingApi.Mappers
                 }).ToList(),
                 Address = new AddressDto
                 {
+                    Id = propertyModel.AddressId,
                     Street = propertyModel.Address.Street,
                     City = propertyModel.Address.City,
                     Country = propertyModel.Address.Country,
@@ -49,6 +51,14 @@ namespace BookingApi.Mappers
                     Url = p.Url,
                     Description = p.Description
                 }).ToList(),
+                Bookings = propertyModel.Bookings.Select(b => new BookingDto
+                {
+                    Id = b.Id,
+                    PropertyId = b.PropertyId,
+                    StartDate = b.StartDate,
+                    EndDate = b.EndDate,
+                    UserId = b.UserId
+                }).ToList() 
             };
         }
 
@@ -76,7 +86,6 @@ namespace BookingApi.Mappers
                 },
                 Amenities = createPropertyRequest.Amenities.Select(a => new PropertyAmenity
                 {
-                    Id = a.Id,
                     Name = a.Name
                 }).ToList()
             };

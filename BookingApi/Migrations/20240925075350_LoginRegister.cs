@@ -5,7 +5,7 @@
 namespace BookingApi.Migrations
 {
     /// <inheritdoc />
-    public partial class Update : Migration
+    public partial class LoginRegister : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
