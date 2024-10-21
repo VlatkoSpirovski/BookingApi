@@ -26,10 +26,13 @@ builder.Services.AddSwaggerGen(c =>
     // Add security definition for Bearer token
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        In = ParameterLocation.Header,
-        Description = "Please enter your token in the format **Bearer {your token}**",
+      
         Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter your JWT token as Bearer token in this format: 'Bearer <your_token>'"
     });
 
     // Add security requirement
@@ -59,24 +62,26 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = configuration["Jwt:Issuer"],
-            ValidAudience = configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
 
         options.Events = new JwtBearerEvents
         {
             OnAuthenticationFailed = context =>
             {
-                // Handle authentication failure
-                return Task.CompletedTask;
+                Console.WriteLine("Authentication failed: " + context.Exception.Message);
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+                return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new { error = "Invalid or expired token" }));
             },
             OnChallenge = context =>
             {
                 context.HandleResponse(); // Suppress default challenge response
                 context.Response.StatusCode = 401;
                 context.Response.ContentType = "application/json";
-                return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new { error = "Unauthorized" }));
+                return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new { error = "Unauthorized access" }));
             }
         };
     });

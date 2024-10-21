@@ -12,7 +12,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace BookingApi.Controllers;
 
-[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class AuthController : ControllerBase
@@ -20,19 +19,18 @@ public class AuthController : ControllerBase
     private readonly UserManager<IdentityUser> _userManager;
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly EmailService _emailService;
-    private readonly IConfiguration _configuration; // Add this field to store the configuration
-
-    // Inject IConfiguration
+    private readonly IConfiguration _configuration;
+    
     public AuthController(
         UserManager<IdentityUser> userManager, 
         SignInManager<IdentityUser> signInManager, 
         EmailService emailService,
-        IConfiguration configuration) // Add configuration to the constructor
+        IConfiguration configuration)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _emailService = emailService;
-        _configuration = configuration; // Assign configuration
+        _configuration = configuration;
     }
 
     [HttpPost("/register")]
@@ -119,7 +117,6 @@ public class AuthController : ControllerBase
             new Claim(ClaimTypes.NameIdentifier, user.Id) // Include the user ID
         };
 
-        // Use _configuration instead of Configuration
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 

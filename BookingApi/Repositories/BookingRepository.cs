@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices.JavaScript;
 using BookingApi.Data;
+using BookingApi.Dtos.Bookings;
 using BookingApi.Interfaces;
 using BookingApi.Models;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +14,16 @@ public class BookingRepository : IBookingRepository
     {
         _context = context;
     }
-    public async Task<List<Booking>> GetAllAsync()
+    public async Task<List<BookingDto>> GetAllAsync()
     {
-        return await _context.Bookings.Include(p => p.Property).ToListAsync();
+        return await _context.Bookings.Select(b => new BookingDto
+        {
+            Id = b.Id,
+            PropertyId = b.PropertyId,
+            StartDate = b.StartDate,
+            EndDate = b.EndDate,
+            UserId = b.UserId,
+        }).ToListAsync();
     }
 
     public async Task<Booking?> GetByIdAsync(int id)

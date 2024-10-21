@@ -8,7 +8,9 @@ using BookingApi.Data;
 using BookingApi.Dtos.Bookings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-[Authorize]
+
+namespace BookingApi.Controllers;
+
 [ApiController]
 [Route("/api/[controller]")]
 public class BookingController : ControllerBase
@@ -22,14 +24,15 @@ public class BookingController : ControllerBase
         _bookingRepo = bookingRepo;
         _dbContext = dbContext;
     }
+    
     [Authorize]
     [HttpGet]
     public async Task<ActionResult<List<Booking>>> GetBookings()
     {
-        var bookings = await _bookingRepo.GetAllAsync();
-        return Ok(bookings);
+            var bookings = await _bookingRepo.GetAllAsync();
+            return Ok(bookings);
+        
     }
-    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<Booking>> GetBookingById(int id)
     {
@@ -41,17 +44,13 @@ public class BookingController : ControllerBase
         return Ok(booking);
     }
     
-
     [HttpPost]
-    [Authorize]
     public async Task<ActionResult<Booking>> CreateBooking([FromBody] CreateBookingDto booking)
     {
-        // Get the User ID from the claims
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized();
 
-        // Check if the user exists in the database
         var userExists = await _dbContext.Users.AnyAsync(u => u.Id == userId);
         if (!userExists)
         {
@@ -63,8 +62,7 @@ public class BookingController : ControllerBase
         {
             return NotFound($"Property with ID {booking.PropertyId} not found");
         }
-
-        // Ensure that the property is available for booking
+        
         if (!property.IsAvailable)
         {
             return BadRequest("Property is not available for booking.");
@@ -75,16 +73,15 @@ public class BookingController : ControllerBase
             PropertyId = booking.PropertyId,
             StartDate = booking.StartDate,
             EndDate = booking.EndDate,
-            UserId = userId // Use the logged-in user's ID
+            UserId = userId
         };
 
-        property.Bookings.Add(reservation); // Add booking to the property
-        await _propertyRepo.UpdateAsync(property, booking.PropertyId); // Update property in the database
+        property.Bookings.Add(reservation);
+        await _propertyRepo.UpdateAsync(property, booking.PropertyId);
 
-        return CreatedAtAction(nameof(GetBookingById), new { id = reservation.Id }, reservation); // Return created booking
+        return CreatedAtAction(nameof(GetBookingById), new { id = reservation.Id }, reservation);
     }
-
-    [Authorize]
+    
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteBooking(int id)
     {
