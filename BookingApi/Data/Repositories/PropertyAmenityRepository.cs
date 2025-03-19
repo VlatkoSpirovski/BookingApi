@@ -18,7 +18,7 @@ public class PropertyAmenityRepository : IPropertyAmenityRepository
 
     public async Task Add(PropertyAmenity property, CancellationToken cancellationToken = default)
     { 
-        await _dbContext.PropertyAmenities.AddAsync(property,cancellationToken = default);
+        await _dbContext.PropertyAmenities.AddAsync(property, cancellationToken);
     }
 
     public Task Update(PropertyAmenity property, CancellationToken cancellationToken = default)

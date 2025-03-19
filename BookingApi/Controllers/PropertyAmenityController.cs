@@ -14,7 +14,14 @@ public class PropertyAmenityController : ControllerBase
     {
         _mediator = mediator;
     }
-
+    
+    [HttpGet("{propertyId:guid}")]
+    public async Task<ActionResult<PropertyAmenityResponseModel>> GetPropertyAmenities(
+        [FromRoute] Guid propertyId)
+    {
+        return Ok(await _mediator.Send(new GetByPropertyIdPropertyAmenityQuery(propertyId)));
+    }
+    
     [HttpPut]
     public async Task<ActionResult<PropertyAmenityResponseModel>> SubmitPropertyAmenities(
         [FromRoute] Guid propertyId,
