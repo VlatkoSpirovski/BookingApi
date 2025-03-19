@@ -150,3 +150,6 @@
 /Users/vlatkospirovski/RiderProjects/BookingApi/BookingApi/obj/Debug/net8.0/BookingApi.pdb
 /Users/vlatkospirovski/RiderProjects/BookingApi/BookingApi/obj/Debug/net8.0/BookingApi.genruntimeconfig.cache
 /Users/vlatkospirovski/RiderProjects/BookingApi/BookingApi/obj/Debug/net8.0/ref/BookingApi.dll
+/Users/vlatkospirovski/RiderProjects/BookingApi/BookingApi/bin/Debug/net8.0/AutoMapper.dll
+/Users/vlatkospirovski/RiderProjects/BookingApi/BookingApi/bin/Debug/net8.0/MediatR.dll
+/Users/vlatkospirovski/RiderProjects/BookingApi/BookingApi/bin/Debug/net8.0/MediatR.Contracts.dll

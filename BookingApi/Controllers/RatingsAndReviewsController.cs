@@ -1,5 +1,4 @@
-using BookingApi.Dtos.RatingsAndReviews;
-using BookingApi.Interfaces;
+/*using BookingApi.BusinessLogic.Interfaces;
 using BookingApi.Mappers;
 using BookingApi.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -79,4 +78,4 @@ public class RatingsAndReviewsController : ControllerBase
         await _ratingsRepository.CreateIdPropertyAsync(ratingModel);
         return CreatedAtAction(nameof(GetRatingById), new { id = ratingModel.Id }, ratingModel);
     }
-}
+}*/

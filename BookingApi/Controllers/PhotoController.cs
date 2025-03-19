@@ -1,5 +1,6 @@
-using BookingApi.Dtos.Photos;
-using BookingApi.Interfaces;
+/*
+using BookingApi.BusinessLogic.Interfaces;
+using BookingApi.Domain.ResponseModels.Photos;
 using BookingApi.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -40,17 +41,16 @@ public class PhotoController : ControllerBase
         return Ok(photo);
     }
 
-
     [HttpGet("{id}")]
-    public async Task<ActionResult<PhotoDto>> GetPhotoById(int id)
+    public async Task<ActionResult<PhotoResponseModel>> GetPhotoById(int id)
     {
         var photo = await _photoRepo.GetPhotoByIdAsync(id);
         if (photo == null)
         {
-            return NotFound();
+            throw new NullReferenceException();
         }
 
-        var photoDto = new PhotoDto
+        var photoDto = new PhotoResponseModel
         {
             Id = photo.Id,
             Url = photo.Url,
@@ -58,13 +58,14 @@ public class PhotoController : ControllerBase
         };
 
         return Ok(photoDto);
+        
     }
 
     [HttpGet("property/{propertyId}")]
-    public async Task<ActionResult<IEnumerable<PhotoDto>>> GetPhotosByPropertyId(int propertyId)
+    public async Task<ActionResult<IEnumerable<PhotoResponseModel>>> GetPhotosByPropertyId(int propertyId)
     {
         var photos = await _photoRepo.GetPhotosByPropertyIdAsync(propertyId);
-        var photoDtos = photos.Select(p => new PhotoDto
+        var photoDtos = photos.Select(p => new PhotoResponseModel
         {
             Id = p.Id,
             Url = p.Url,
@@ -81,3 +82,4 @@ public class PhotoController : ControllerBase
         return NoContent();
     }
 }
+*/

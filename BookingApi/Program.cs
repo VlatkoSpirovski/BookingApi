@@ -1,23 +1,31 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using BookingApi.BusinessLogic.Interfaces;
 using BookingApi.Data;
-using BookingApi.Interfaces;
-using BookingApi.Repositories;
+using BookingApi.Data.Repositories;
+using BookingApi.Helpers;
 using BookingApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
+using MediatR;
+using System.Reflection;
+using BookingApi.BusinessLogic;
 
 var builder = WebApplication.CreateBuilder(args);
+//builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 // Access configuration
 var configuration = builder.Configuration;
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 // Add services to the container.
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -26,7 +34,6 @@ builder.Services.AddSwaggerGen(c =>
     // Add security definition for Bearer token
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-      
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         Scheme = "bearer",
@@ -51,45 +58,44 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+builder.Services.AddControllers();
 
-// JWT Authentication setup
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.RequireHttpsMetadata = false; // Change to true in production
+        options.SaveToken = false; // Set to true if you want to save the token
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(configuration["ApplicationSettings:JWT_Secret"])
+            ),
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ClockSkew = TimeSpan.Zero // Remove delay of token expiration
         };
 
+        // Prevent redirection on unauthorized requests
         options.Events = new JwtBearerEvents
         {
-            OnAuthenticationFailed = context =>
-            {
-                Console.WriteLine("Authentication failed: " + context.Exception.Message);
-                context.Response.StatusCode = 401;
-                context.Response.ContentType = "application/json";
-                return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new { error = "Invalid or expired token" }));
-            },
             OnChallenge = context =>
             {
-                context.HandleResponse(); // Suppress default challenge response
-                context.Response.StatusCode = 401;
-                context.Response.ContentType = "application/json";
-                return context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(new { error = "Unauthorized access" }));
+                context.HandleResponse(); // Prevent the default behavior
+                context.Response.StatusCode = 401; // Set the status code to 401
+                context.Response.ContentType = "application/json"; // Set the content type
+                var result = System.Text.Json.JsonSerializer.Serialize(new { error = "Unauthorized" });
+                return context.Response.WriteAsync(result);
             }
         };
     });
 
-// Add controllers and configure JSON options using Newtonsoft
+// Configure JSON options using Newtonsoft
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+    options.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
 });
 
 // Configure JSON options for System.Text.Json
@@ -121,13 +127,12 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.User.RequireUniqueEmail = true;
 });
 
-// Register repositories and services
-builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
-builder.Services.AddScoped<IRatingsAndReviewsRepository, RatingsAndReviewsRepository>();
-builder.Services.AddScoped<IPhotoRepository, PhotoRepository>();
-builder.Services.AddScoped<IBookingRepository, BookingRepository>();
-builder.Services.AddScoped<IBookingService, BookingService>();
+
 builder.Services.AddTransient<EmailService>();
+builder.Services.AddTransient<AuthHelpers>();
+builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
+builder.Services.AddScoped<IPropertyAmenityRepository, PropertyAmenityRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Build the app
 var app = builder.Build();
@@ -143,7 +148,6 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication(); // Ensure authentication middleware is invoked
 app.UseAuthorization();  // Ensure authorization middleware is invoked
-
 app.MapControllers();    // Map controller routes
 
 // Ensure roles are created after building the app

@@ -1,6 +1,8 @@
+/*
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using BookingApi.Helpers;
 using BookingApi.Models;
 using BookingApi.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -20,29 +22,32 @@ public class AuthController : ControllerBase
     private readonly SignInManager<IdentityUser> _signInManager;
     private readonly EmailService _emailService;
     private readonly IConfiguration _configuration;
-    
+    private readonly AuthHelpers _helper;
     public AuthController(
         UserManager<IdentityUser> userManager, 
         SignInManager<IdentityUser> signInManager, 
         EmailService emailService,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        AuthHelpers authHelper)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _emailService = emailService;
         _configuration = configuration;
+        _helper = authHelper;
     }
 
+    [AllowAnonymous]
     [HttpPost("/register")]
-    public async Task<IActionResult> Register([FromBody] RegisterModel model)
+    public async Task<IActionResult> Register([FromBody] RegisterModel1 model1)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
 
-        var user = new IdentityUser { UserName = model.Email, Email = model.Email };
-        var result = await _userManager.CreateAsync(user, model.Password);
+        var user = new IdentityUser { UserName = model1.Email, Email = model1.Email };
+        var result = await _userManager.CreateAsync(user, model1.Password);
 
         if (!result.Succeeded)
         {
@@ -60,27 +65,28 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Registration successful. Please confirm your email." });
     }
 
+    [AllowAnonymous]
     [HttpPost("/login")]
-    public async Task<IActionResult> Login([FromBody] LoginModel model)
+    public async Task<IActionResult> Login([FromBody] LoginModel1 model1)
     {
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);
         }
         
-        var user = await _userManager.FindByEmailAsync(model.Email);
+        var user = await _userManager.FindByEmailAsync(model1.Email);
         if (user == null)
         {
             return Unauthorized(new { message = "Invalid credentials for the Email" });
         }
         
-        var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
+        var result = await _signInManager.PasswordSignInAsync(user, model1.Password, false, false);
         if (!result.Succeeded)
         {
             return Unauthorized(new { message = "Invalid credentials for the Password" });
         }
         
-        return Ok(new { token = GenerateJwtToken(user) });
+        return Ok(new { token = _helper.GenerateJWTToken(user)});
     }
 
     [HttpGet("confirmemail")]
@@ -108,25 +114,6 @@ public class AuthController : ControllerBase
         return Ok(users);
     }
 
-    private string GenerateJwtToken(IdentityUser user)
-    {
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.NameIdentifier, user.Id) // Include the user ID
-        };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.Now.AddMinutes(30),
-            signingCredentials: creds);
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
 }
+*/
