@@ -1,0 +1,37 @@
+namespace BookingApi.Domain.Enums;
+
+public enum GeneralAmenityType
+{
+    Free_Wifi,
+    FreeParking,
+    PaidParking,
+    PetAllowed,
+    RoomService,
+    Full_hour_desc,
+    Non_smoking_rooms,
+    Private_entrance,
+    FullHourReception,
+    Elevator,
+    Heating,
+    LuggageStorage,
+    ConciergeService,
+    BreakfastIncluded,
+    AccessibleRooms,
+    ShuttleService,
+    OutdoorSeating,
+    LaundryService,
+    BicycleRental,
+    BusinessCenter,
+    WheelchairAccessible,
+    PoolsideBar,
+    AirportShuttle,
+    Babysitting,
+    GiftShop,
+    FamilyRooms,
+    GardenArea,
+    OnsiteRestaurant,
+    Bar,
+    ATMOnSite,
+    SecurityCameras,
+    SmokeFreeProperty
+}
