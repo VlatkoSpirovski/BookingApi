@@ -13,21 +13,21 @@ public class Property : IEntity
     public string State { get; set; }
     public string Country { get; set; }
     public string ZipCode { get; set; }
-    public int NumberOfRooms { get; set; }
-    public int NumberOfBedrooms { get; set; }
-    public int NumberOfKitchens { get; set; }
-    public int NumberOfLivingRooms { get; set; }
-    public int NumberOfBalconies { get; set; }
-    public int NumberOfBathrooms { get; set; }
-    public int MaxGuests { get; set; }
-    public int NumberOfBookings { get; set; }
-    public int MinBookingLeadTimeDays { get; set; }
-    public decimal PricePerNight { get; set; }
-    public decimal AverageRating { get; set; }
+    public int? NumberOfRooms { get; set; }
+    public int? NumberOfBedrooms { get; set; }
+    public int? NumberOfKitchens { get; set; }
+    public int? NumberOfLivingRooms { get; set; }
+    public int? NumberOfBalconies { get; set; }
+    public int? NumberOfBathrooms { get; set; }
+    public int? MaxGuests { get; set; }
+    public int? NumberOfBookings { get; set; }
+    public int? MinBookingLeadTimeDays { get; set; }
+    public decimal? PricePerNight { get; set; }
+    public decimal? AverageRating { get; set; }
     public decimal? DiscountPercentage { get; set; }
     public bool IsAvailable { get; set; } = true;
-    public DateTime AvailableFrom { get; set; }
-    public DateTime AvailableTo { get; set; }
+    public DateTime? AvailableFrom { get; set; }
+    public DateTime? AvailableTo { get; set; }
     public DateTime? LastBookedAt { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
@@ -35,8 +35,10 @@ public class Property : IEntity
     public DateTime? DiscountEndDate { get; set; }
     public PropertyType PropertyType { get; set; }
     public PropertyStatus PropertyStatus { get; set; }
+    public RentalModel RentalModel { get; set; }
     public User? Owner { get; set; }
     public ICollection<Booking>? Bookings { get; set; }
-    public ICollection<PropertyAmenity> PropertyAmenities { get; set; } 
+    public ICollection<PropertyAmenity>? PropertyAmenities { get; set; } 
+    public ICollection<Room>? Rooms { get; set; } 
 
 }

@@ -13,6 +13,7 @@ public class ApplicationDbContext : IdentityDbContext<User>
     }
     public DbSet<Property> Properties { get; set; }
     public DbSet<Booking> Bookings { get; set; }
+    public DbSet<Room> Rooms { get; set; }
     public DbSet<PropertyAmenity> PropertyAmenities { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -28,6 +29,12 @@ public class ApplicationDbContext : IdentityDbContext<User>
             .WithMany(p => p.PropertyAmenities)
             .HasForeignKey(pa => pa.PropertyId)
            .OnDelete(DeleteBehavior.Cascade);
+        
+        modelBuilder.Entity<Property>()
+            .HasMany(p => p.Rooms)
+            .WithOne(b => b.Property)
+            .HasForeignKey(b => b.PropertyId)
+            .OnDelete(DeleteBehavior.Cascade);
         
         SeedUsers(modelBuilder);
         base.OnModelCreating(modelBuilder);

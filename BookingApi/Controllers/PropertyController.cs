@@ -33,7 +33,7 @@ namespace BookingApi.Controllers;
             return Ok(await _mediator.Send(command));
         }
 
-        [HttpPut("{id:guid}")]
+        [HttpPatch("{id:guid}")]
         public async Task<ActionResult<PropertyResponseModel>> UpdateProperty([FromRoute]Guid id,
             [FromBody] SubmitPropertyCommand command)
         {

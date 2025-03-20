@@ -1,6 +1,7 @@
 using BookingApi.BusinessLogic.Interfaces;
 using MediatR;
 using BookingApi.Domain.Entities;
+using BookingApi.Domain.Enums;
 
 namespace BookingApi.BusinessLogic.UseCases;
 
@@ -12,7 +13,8 @@ public record CreatePropertyCommand(
     string City,
     string State,
     string Country,
-    string ZipCode) : IRequest<Guid>;
+    string ZipCode,
+    PropertyType PropertyType) : IRequest<Guid>;
 
 internal sealed class CreatePropertyCommandHandler : IRequestHandler<CreatePropertyCommand, Guid>
 {
@@ -36,8 +38,28 @@ internal sealed class CreatePropertyCommandHandler : IRequestHandler<CreatePrope
             Country = request.Country,
             ZipCode = request.ZipCode,
             OwnerId = request.OwnerId.ToString(),
+            PropertyType = request.PropertyType,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
+
+            NumberOfRooms = null,
+            NumberOfBedrooms = null,
+            NumberOfKitchens = null,
+            NumberOfLivingRooms = null,
+            NumberOfBalconies = null,
+            NumberOfBathrooms = null,
+            MaxGuests = null,
+            NumberOfBookings = null,
+            MinBookingLeadTimeDays = null,
+            PricePerNight = null,
+            AverageRating = null,
+            DiscountPercentage = null,
+            IsAvailable = true,
+            AvailableFrom = null,
+            AvailableTo = null,
+            LastBookedAt = null,
+            DiscountStartDate = null,
+            DiscountEndDate = null
         };
 
         await _unitOfWork.PropertyRepository.Add(newProperty, cancellationToken);
@@ -46,4 +68,5 @@ internal sealed class CreatePropertyCommandHandler : IRequestHandler<CreatePrope
         return newProperty.Id;
     }
 }
+
 

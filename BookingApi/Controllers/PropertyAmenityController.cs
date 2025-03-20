@@ -22,9 +22,8 @@ public class PropertyAmenityController : ControllerBase
         return Ok(await _mediator.Send(new GetByPropertyIdPropertyAmenityQuery(propertyId)));
     }
     
-    [HttpPut]
+    [HttpPatch("{propertyId:guid}")]
     public async Task<ActionResult<PropertyAmenityResponseModel>> SubmitPropertyAmenities(
-        [FromRoute] Guid propertyId,
         [FromBody] SubmitPropertyAmenitiesCommand command)
     {
         return Ok(await _mediator.Send(command));

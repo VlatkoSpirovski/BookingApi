@@ -46,6 +46,9 @@ namespace BookingApi.Data.Migrations
                     b.Property<Guid>("PropertyId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("RoomId")
+                        .HasColumnType("uuid");
+
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("numeric");
 
@@ -58,6 +61,8 @@ namespace BookingApi.Data.Migrations
 
                     b.HasIndex("PropertyId");
 
+                    b.HasIndex("RoomId");
+
                     b.ToTable("Bookings");
                 });
 
@@ -67,13 +72,13 @@ namespace BookingApi.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("AvailableFrom")
+                    b.Property<DateTime?>("AvailableFrom")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime>("AvailableTo")
+                    b.Property<DateTime?>("AvailableTo")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("AverageRating")
+                    b.Property<decimal?>("AverageRating")
                         .HasColumnType("numeric");
 
                     b.Property<string>("City")
@@ -106,48 +111,51 @@ namespace BookingApi.Data.Migrations
                     b.Property<DateTime?>("LastBookedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("MaxGuests")
+                    b.Property<int?>("MaxGuests")
                         .HasColumnType("integer");
 
-                    b.Property<int>("MinBookingLeadTimeDays")
+                    b.Property<int?>("MinBookingLeadTimeDays")
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("NumberOfBalconies")
+                    b.Property<int?>("NumberOfBalconies")
                         .HasColumnType("integer");
 
-                    b.Property<int>("NumberOfBathrooms")
+                    b.Property<int?>("NumberOfBathrooms")
                         .HasColumnType("integer");
 
-                    b.Property<int>("NumberOfBedrooms")
+                    b.Property<int?>("NumberOfBedrooms")
                         .HasColumnType("integer");
 
-                    b.Property<int>("NumberOfBookings")
+                    b.Property<int?>("NumberOfBookings")
                         .HasColumnType("integer");
 
-                    b.Property<int>("NumberOfKitchens")
+                    b.Property<int?>("NumberOfKitchens")
                         .HasColumnType("integer");
 
-                    b.Property<int>("NumberOfLivingRooms")
+                    b.Property<int?>("NumberOfLivingRooms")
                         .HasColumnType("integer");
 
-                    b.Property<int>("NumberOfRooms")
+                    b.Property<int?>("NumberOfRooms")
                         .HasColumnType("integer");
 
                     b.Property<string>("OwnerId")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("PricePerNight")
+                    b.Property<decimal?>("PricePerNight")
                         .HasColumnType("numeric");
 
                     b.Property<int>("PropertyStatus")
                         .HasColumnType("integer");
 
                     b.Property<int>("PropertyType")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RentalModel")
                         .HasColumnType("integer");
 
                     b.Property<string>("State")
@@ -182,11 +190,9 @@ namespace BookingApi.Data.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int[]>("GeneralAmenityTypes")
-                        .IsRequired()
                         .HasColumnType("integer[]");
 
                     b.Property<int[]>("OutdoorAmenityTypes")
-                        .IsRequired()
                         .HasColumnType("integer[]");
 
                     b.Property<Guid>("PropertyId")
@@ -200,6 +206,53 @@ namespace BookingApi.Data.Migrations
                     b.HasIndex("PropertyId");
 
                     b.ToTable("PropertyAmenities");
+                });
+
+            modelBuilder.Entity("BookingApi.Domain.Entities.Room", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("BedType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Floor")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("MaxOccupancy")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("NumberOfBeds")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("PricePerNight")
+                        .HasColumnType("numeric");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RoomName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("RoomType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyId");
+
+                    b.ToTable("Rooms");
                 });
 
             modelBuilder.Entity("BookingApi.Domain.Entities.User", b =>
@@ -298,12 +351,12 @@ namespace BookingApi.Data.Migrations
                         {
                             Id = "9404b88a-b6f4-411d-8281-c00e5645c0a5",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "bc340002-fa97-4719-93ce-530cf0952637",
+                            ConcurrencyStamp = "dedea5d4-6b8c-4889-9b1d-3c9cbd58f991",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@EXAMPLE.COM",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "538feaf1-4be8-48dc-b88a-046acd2e2a24",
+                            SecurityStamp = "38438fc3-9281-471a-9fa2-43100650f806",
                             TwoFactorEnabled = false,
                             UserId = "bookingUser1"
                         });
@@ -453,6 +506,10 @@ namespace BookingApi.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BookingApi.Domain.Entities.Room", null)
+                        .WithMany("Bookings")
+                        .HasForeignKey("RoomId");
+
                     b.Navigation("Owner");
 
                     b.Navigation("Property");
@@ -473,6 +530,17 @@ namespace BookingApi.Data.Migrations
                 {
                     b.HasOne("BookingApi.Domain.Entities.Property", "Property")
                         .WithMany("PropertyAmenities")
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Property");
+                });
+
+            modelBuilder.Entity("BookingApi.Domain.Entities.Room", b =>
+                {
+                    b.HasOne("BookingApi.Domain.Entities.Property", "Property")
+                        .WithMany("Rooms")
                         .HasForeignKey("PropertyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -536,6 +604,13 @@ namespace BookingApi.Data.Migrations
                     b.Navigation("Bookings");
 
                     b.Navigation("PropertyAmenities");
+
+                    b.Navigation("Rooms");
+                });
+
+            modelBuilder.Entity("BookingApi.Domain.Entities.Room", b =>
+                {
+                    b.Navigation("Bookings");
                 });
 #pragma warning restore 612, 618
         }
