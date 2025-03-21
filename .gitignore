@@ -1,86 +1,45 @@
-# Ignore build output
+# Ignore build output and compiled binaries
 bin/
 obj/
+*.dll
+*.exe
+*.pdb
+*.cache
 
-# Ignore user-specific files
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
-.vscode/
-
-# Ignore dependency cache
+# Ignore dependency and package manager files
 packages/
 node_modules/
 wwwroot/lib/
-
-# Ignore logs and databases
-logs/
-*.log
-app.db
-appsettings.json
-appsettings.Development.json
-# Ignore build output
-bin/
-obj/
-
-# Ignore user-specific files
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
-.vscode/
-
-# Ignore dependency cache
-packages/
-node_modules/
-wwwroot/lib/
-
-# Ignore logs and databases
-logs/
-*.log
-app.db
-appsettings.json
-appsettings.Development.json
-
-# Ignore environment settings
-.env
-.env.local
-
-# Ignore Visual Studio files
-.vscode/
-*.vs/# Ignore build output
-bin/
-obj/
-
-# Ignore user-specific files
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
-.vscode/
-*.vs/
-
-# Ignore dependency cache
-packages/
-node_modules/
-wwwroot/lib/
-
-# Ignore logs and databases
-logs/
-*.log
-app.db
-
-# Ignore configuration files
-appsettings.json
-appsettings.Development.json
-
-# Ignore environment settings
-.env
-.env.local
+project.nuget.cache
+*.nuget.cache
+*.nuget.g.props
+*.nuget.g.targets
 
 # Ignore Rider and JetBrains files
 .idea/
 *.iml
 out/
+*.sln.docstates
+*.vs/
+rider.*
 
+# Ignore Visual Studio files
+.vscode/
+*.user
+*.suo
+*.userosscache
+
+# Ignore logs and generated files
+logs/
+*.log
+
+# Ignore configuration and environment files
+app.db
+appsettings.json
+appsettings.Development.json
+.env
+.env.local
+
+# Ignore auto-generated Assembly and project files
+*.csproj.nuget.g.props
+*.csproj.nuget.g.targets
